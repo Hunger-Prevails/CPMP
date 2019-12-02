@@ -21,6 +21,7 @@
 /*---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+----1----+----2*/
 
 #include <assert.h>
+#include <stdio.h>
 
 #include "reader_cpmp.h"
 #include "probdata.h"
@@ -64,6 +65,9 @@ SCIP_DECL_READERREAD(readerReadCpmp)
       return SCIP_NOFILE;
    }
 
+   //printf("%s", "asdfsdf");
+   //SCIPerrorMessage("cannot open file <%s> for reading\n", filename);
+
    nlines = 0;
    readerror = FALSE;
 
@@ -88,6 +92,8 @@ SCIP_DECL_READERREAD(readerReadCpmp)
       ++nlines;
    }
 
+   //printf("%d %d", nlocations, nclusters);
+
    /* allocate memory for the demand and capacity vectors as well as the distance matrix */
    SCIP_CALL( SCIPallocBufferArray(scip, &demands, nlocations) );
    SCIP_CALL( SCIPallocBufferArray(scip, &capacities, nlocations) );
@@ -104,7 +110,7 @@ SCIP_DECL_READERREAD(readerReadCpmp)
     * ********************************************************************************
     */
    /* read the distance matrix */
-   while( !SCIPfeof(file) && !readerror && TRUE )
+   while( !SCIPfeof(file) && !readerror && nlines <= nlocations )
    {
       char* pos;                             /* current position in the input line */
       char* next;                            /* next position in the input line    */
@@ -117,8 +123,22 @@ SCIP_DECL_READERREAD(readerReadCpmp)
        * ********************************************************************************
        */
 
+      if ( SCIPfgets(buffer, (int)sizeof(buffer), file) == NULL )
+    	  readerror = TRUE;
 
+      //printf("%s", buffer);
 
+      for ( pos = buffer, nentries = 0; nentries < nlocations; pos = next, ++nentries )
+      {
+    	  entry = strtol(pos, &next, 10);
+    	  //printf("%s", next);
+    	  if( next != pos )
+    		  distances[nlines - 1][nentries] = entry;
+    	  else
+    		  break;
+      }
+
+      ++nlines;
 
       if( nentries < nlocations )
       {
@@ -128,6 +148,15 @@ SCIP_DECL_READERREAD(readerReadCpmp)
          break;
       }
    }
+
+   /*for (int i = 0; i < nlocations; ++i)
+   {
+	   for (int j = 0; j < nlocations; ++j)
+	   {
+		   printf("%lld ", distances[i][j]);
+	   }
+	   printf("\n");
+   }*/
 
    if( nlines < nlocations + 1 )
    {
@@ -211,7 +240,7 @@ SCIP_DECL_READERREAD(readerReadCpmp)
       SCIP_CALL( SCIPcreateProbBasic(scip, filename) );
       SCIP_CALL( SCIPcreateProbCpmp(scip, nlocations, nclusters, distances, demands, capacities) );
    }
-
+   //printf("asdfasdf");
    /* free memory */
    for( i = 0; i < nlocations; ++i )
    {
@@ -227,6 +256,7 @@ SCIP_DECL_READERREAD(readerReadCpmp)
       return SCIP_READERROR;
 
    *result = SCIP_SUCCESS;
+   //printf("asdfasdf");
    return SCIP_OKAY;
 }
 
@@ -248,6 +278,6 @@ SCIP_RETCODE SCIPincludeReaderCpmp(
 
    /* set non fundamental callbacks via setter functions */
    SCIP_CALL( SCIPsetReaderRead(scip, reader, readerReadCpmp) );
-
+   //printf("asdfasdf");
    return SCIP_OKAY;
 }
