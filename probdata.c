@@ -25,8 +25,6 @@
 #include "pub_probdata.h"
 #include "struct_probdata.h"
 
-//#include "scip/struct_prob.h"
-
 #include "scip/cons_linear.h"
 #include "scip/cons_setppc.h"
 
@@ -129,23 +127,20 @@ SCIP_RETCODE createConstraints(
     * ****************************************************************************************************
     */
 
-   //SCIPsnprintf(name, 13, "serviceconss");
-   //SCIP_CALL(SCIPcreateConsLinear(scip, probdata->serviceconss, name, 0, NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
-
    for (int i = 0;i < nlocations; ++i) {
-	   SCIPsnprintf(name, 13, "serviceconss"+(i+'0'));
-	   SCIP_CALL(SCIPcreateConsLinear(scip, &(probdata->serviceconss[i]), name, 0, NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
-	   SCIP_CALL(SCIPaddCons(scip, probdata->serviceconss[i]));
+		SCIPsnprintf(name, 13, "serviceconss" + (i + '0'));
+		SCIP_CALL(SCIPcreateConsLinear(scip, &(probdata->serviceconss[i]), name, 0, NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
+		SCIP_CALL(SCIPaddCons(scip, probdata->serviceconss[i]));
 
-	   SCIPsnprintf(name, 13, "convconss"+(i+'0'));
-	   	   SCIP_CALL(SCIPcreateConsLinear(scip, &(probdata->convconss[i]), name, 0, NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
-	   	   SCIP_CALL(SCIPaddCons(scip, probdata->convconss[i]));
+		SCIPsnprintf(name, 13, "convconss" + (i + '0'));
+		SCIP_CALL(SCIPcreateConsLinear(scip, &(probdata->convconss[i]), name, 0, NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
+		SCIP_CALL(SCIPaddCons(scip, probdata->convconss[i]));
    }
 
    SCIPsnprintf(name, 13, "mediancons");
    SCIP_CALL(SCIPcreateConsLinear(scip, &(probdata->mediancons), name, 0, NULL, NULL, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
    SCIP_CALL(SCIPaddCons(scip, probdata->mediancons));
-   //SCIPprintProbData(scip);
+   SCIPprintProbData(scip);
    return SCIP_OKAY;
 }
 
