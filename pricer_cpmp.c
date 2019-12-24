@@ -66,7 +66,7 @@ SCIP_RETCODE addColumn(
    int                   median,             /* median for which the pricing problem has been solved */
    int*                  locations,          /* locations contained in the new cluster               */
    int                   nlocations,         /* number of locations                                  */
-   SCIP_Real             score               /* score for the column: either its reduces cost or Farkas value */
+   SCIP_Real             score               /* score for the column: either its reduced cost or Farkas value */
    )
 {
    SCIP_Longint** distances;
@@ -95,8 +95,7 @@ SCIP_RETCODE addColumn(
     * TODO: compute the total service costs of the new cluster, to be stored in 'cost'
     * ****************************************************************************************************
     */
-
-
+   for (i = 0; i < nlocations; ++i) cost += distances[locations[i]][median];
 
    /* create a new variable representing the found cluster, add the corresponding data and add it to the master problem */
    (void) SCIPsnprintf(name, SCIP_MAXSTRLEN, "column_%d", SCIPgetNVars(scip));
@@ -113,7 +112,10 @@ SCIP_RETCODE addColumn(
     *   * to the p-median constraint
     * ****************************************************************************************************
     */
+   for (i = 0; i < nlocations; ++i) SCIP_CALL(SCIPaddCoefLinear(scip, serviceconss[locations[i]], var, 1.0));
 
+   SCIP_CALL(SCIPaddCoefLinear(scip, mediancons, var, 1.0));
+   SCIP_CALL(SCIPaddCoefLinear(scip, convconss[median], var, 1.0));
 
    SCIPdebugMessage("Found improving column, score=%g:\n", score);
    SCIPdebug( SCIPprintVarData(scip, var) );
@@ -198,6 +200,18 @@ SCIP_RETCODE performPricing(
        * ****************************************************************************************************
        */
 
+      for ( location = 0; location < nlocations; ++location) {
+
+         if (!SCIPpricerCpmpIsAssignmentForbidden(scip, median, location)) {
+
+            items[nitems] = location;
+            demands[nitems] = alldemands[location];
+
+            if (useredcost) profits[nitems] = pi_service[location] - distances[location][median]; else profits[nitems] = pi_service[location];
+
+            nitems++;
+         }
+      }
 
       SCIP_CALL( SCIPsolveKnapsackExactly(scip, nitems, demands, profits, capacities[median], items, solitems, nonsolitems, &nsolitems, &nnonsolitems, &solval, &success) );
 
@@ -215,18 +229,16 @@ SCIP_RETCODE performPricing(
           */
 
          /* calculate the reduced cost or Farkas value of the new column */
+         if (useredcost) score = - solval - pi_median - pi_conv[median]; else score = solval + pi_median + pi_conv[median];
 
          SCIPdebugMessage("  -> obj = %g\n", score);
 
          /* If an improving column has been found, add it */
-         if( TRUE )
-         {
-
-         }
+         if( SCIPisPositive(scip, score) & !useredcost || SCIPisNegative(scip, score) & useredcost) addColumn(scip, median, solitems, nsolitems, score);
       }
       else
       {
-         SCIPwarningMessage(scip, "Pricing problem for median %d could not be solved!\n", median+1);
+         SCIPwarningMessage(scip, "Pricing problem for median %d could not be solved!\n", median + 1);
       }
    }
 
