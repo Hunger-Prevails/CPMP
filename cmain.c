@@ -57,8 +57,8 @@ SCIP_RETCODE runShell(
     * TODO: uncomment the following lines to enable branching
     * ********************************************************************************
     */
-   // SCIP_CALL( SCIPincludeBranchruleSemiassign(scip) );
-   // SCIP_CALL( SCIPincludeConshdlrSemiassign(scip) );
+   SCIP_CALL( SCIPincludeBranchruleSemiassign(scip) );
+   SCIP_CALL( SCIPincludeConshdlrSemiassign(scip) );
 
    /* include custom dialog handler */
    SCIP_CALL( SCIPincludeDialogCpmp(scip) );

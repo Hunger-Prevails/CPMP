@@ -82,6 +82,13 @@ SCIP_RETCODE computeAssignments(
     */
    for( i = 0; i < nvars; ++i )
    {
+      int cluster = SCIPvarGetMedian(vars[i]->vardata);
+
+      int nmembers = SCIPvarGetNLocations(vars[i]->vardata);
+
+      int* memebers = SCIPvarGetLocations(vars[i]->vardata);
+
+      for ( j = 0; j < nmembers; ++j ) assignments[memebers[j]][cluster] += SCIPgetSolVal(scip, sol, vars[i]);
    }
 
    return SCIP_OKAY;
@@ -154,6 +161,16 @@ SCIP_RETCODE chooseLocation(
        * ****************************************************************************************************
        */
 
+      for ( int j = 0; j < nlocations; ++j )
+      {
+         if ( SCIPisFeasIntegral(scip, assignments[i][j] ) )
+         {
+           nfracmedians += 1;
+           totfrac += assignments[i][j];
+           if ( (j % 2) == 0 ) halffrac += assignments[i][j];
+         }
+      }
+
 
       SCIPdebugMessage("   -> location %d: totfrac = %g, halffrac = %g\n", i+1, totfrac, halffrac);
 
@@ -215,7 +232,16 @@ SCIP_RETCODE performBranching(
        * ****************************************************************************************************
        */
 
-
+      if ( (i % 2) == 1 )
+      {
+         leftforbidden[i] = 0;
+         rightforbidden[i] = 1;
+      }
+      else
+      {
+         leftforbidden[i] = 1;
+         rightforbidden[i] = 0;
+      }
    }
 
    /* ****************************************************************************************************
@@ -225,7 +251,19 @@ SCIP_RETCODE performBranching(
     * ****************************************************************************************************
     */
 
+   SCIP_CALL(SCIPcreateChild(scip, &childnode, 0, SCIPgetLocalTransEstimate(scip)));
 
+   SCIPsnprintf(name, 24, "SemiassignConstrainsLeft");
+   SCIP_CALL(SCIPcreateConsSemiassign(scip, &childcons, name, location, leftforbidden, childnode));
+   SCIP_CALL(SCIPaddConsNode(scip, childnode, childcons, NULL));
+   SCIP_CALL(SCIPreleaseCons(scip, &childcons));
+
+   SCIP_CALL(SCIPcreateChild(scip, &childnode, 0, SCIPgetLocalTransEstimate(scip)));
+
+   SCIPsnprintf(name, 25, "SemiassignConstrainsright");
+   SCIP_CALL(SCIPcreateConsSemiassign(scip, &childcons, name, location, leftforbidden, childnode));
+   SCIP_CALL(SCIPaddConsNode(scip, childnode, childcons, NULL));
+   SCIP_CALL(SCIPreleaseCons(scip, &childcons));
 
    SCIPfreeBufferArray(scip, &leftforbidden);
    SCIPfreeBufferArray(scip, &rightforbidden);
