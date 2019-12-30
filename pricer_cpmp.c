@@ -112,10 +112,10 @@ SCIP_RETCODE addColumn(
     *   * to the p-median constraint
     * ****************************************************************************************************
     */
-   for (i = 0; i < nlocations; ++i) SCIP_CALL(SCIPaddCoefLinear(scip, serviceconss[locations[i]], var, 1.0));
+   for (i = 0; i < nlocations; ++i) SCIP_CALL( SCIPaddCoefLinear(scip, serviceconss[locations[i]], var, 1.0) );
 
-   SCIP_CALL(SCIPaddCoefLinear(scip, mediancons, var, 1.0));
-   SCIP_CALL(SCIPaddCoefLinear(scip, convconss[median], var, 1.0));
+   SCIP_CALL( SCIPaddCoefLinear(scip, mediancons, var, 1.0) );
+   SCIP_CALL( SCIPaddCoefLinear(scip, convconss[median], var, 1.0) );
 
    SCIPdebugMessage("Found improving column, score=%g:\n", score);
    SCIPdebug( SCIPprintVarData(scip, var) );
@@ -199,6 +199,27 @@ SCIP_RETCODE performPricing(
        * NOTE: The profits depend on whether you do reduced cost pricing or Farkas pricing!
        * ****************************************************************************************************
        */
+      SCIP_Real* pi_service;
+      SCIP_Real* pi_conv;
+      SCIP_Real pi_median;
+
+      SCIP_CALL( SCIPallocBufferArray(scip, &pi_service, nlocations) );
+      SCIP_CALL( SCIPallocBufferArray(scip, &pi_conv, nlocations) );
+
+      for ( location = 0; location < nlocations; ++location) {
+
+         if (useredcost) {
+
+            pi_service[location] = SCIPgetDualsolLinear(scip, serviceconss[location]);
+            pi_conv[location] = SCIPgetDualsolLinear(scip, convconss[location]);
+         }
+         else {
+
+            pi_service[location] = SCIPgetDualfarkasLinear(scip, serviceconss[location]);
+            pi_conv[location] = SCIPgetDualfarkasLinear(scip, convconss[location]);
+         }
+      }
+      if (useredcost) pi_median = SCIPgetDualsolLinear(scip, mediancons); else SCIPgetDualfarkasLinear(scip, mediancons);
 
       for ( location = 0; location < nlocations; ++location) {
 
