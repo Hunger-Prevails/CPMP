@@ -1,0 +1,60 @@
+\documentclass[
+	11pt,
+	DIV10,
+	ngerman,
+	a4paper,
+	oneside,
+	headings=normal,
+	captions=tableheading,
+	final,
+	numbers=noenddot
+]{scrartcl}
+
+
+\usepackage[ruled]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+
+\title{A Branch-and-Price Solver based on Column Generation}
+\subtitle{\vspace{0.5cm}a Solution to the Capacitated P-Median Problem}
+\author{Yiran Xing, Yinglun Liu}
+
+
+\begin{document}
+\maketitle
+
+
+\section{Problem and Formulation}
+\label{sec1}
+
+In the classic capacitated p-median problem, we are given a number $ n \in N $ of locations and a number $ p \in N $ of clusters. For each location $ i $, real numbers $ q_{i} \geq 0 $ and $ Q_{i} \geq 0 $ are given to indicate the demand and capacity of this particular location. Between each pair $ \left(i, j\right) $ of locations $ i $ and $ j $, a real number $ d_{ij} \geq 0 $ is given to indicate the distance between them. The objective to find a way to
+
+\begin{itemize}
+	\item choose $ p $ locations as cluster medians,
+	\item assign each location to a single cluster median,
+\end{itemize}
+
+such that
+
+\begin{itemize}
+    \item the sum of distances $ d_{ij} $ over all pairs $ \left(i, j\right) $ of location $ i $ and cluster median $ j $, such that $ i $ is allocated to $ j $, is minimized,
+    \item for each cluster median $ j $, the sum of demands $ q_{i} $ over those locations $ i $ that are allocated to $ j $ does not exceed its capacity $ Q_{j} $.
+\end{itemize}
+
+\subsection{Original Problem Formulation}
+\subsection{Master Problem Formulation}
+
+
+\cite{ceselli2005branch}
+
+\section{Experiments}
+\label{sec2}
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
