@@ -18,6 +18,7 @@
 \usepackage{mathtools}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+% \DeclarePairedDelimiter{\brace}{\lbrace}{\rbrace}
 
 \title{A Branch-and-Price Solver based on Column Generation}
 \subtitle{\vspace{0.5cm}a Solution to the Capacitated P-Median Problem}
@@ -46,10 +47,76 @@ such that
 \end{itemize}
 
 \subsection{Original Problem Formulation}
+
+Let us denote by $ y_{j} \in \{0, 1\} $ whether location $ j $ is chosen as a cluster median and by $ x_{ij} \in \{0, 1\} $ whether location $ i $ is allocated to cluster median $ j $. Then for the original problem we look to find the optimal solution to:
+
+\begin{equation}
+	\label{eq1}
+	z_{IP}^{*} = min \sum_{i \in [n]} \sum_{j \in [n]} d_{ij} \cdot x_{ij}
+\end{equation}
+
+s.t.
+
+\begin{align}
+	\label{eq2}	\sum_{j \in [n]} x_{ij} &= 1 \quad \forall i \in [n] \\[1em]
+	\label{eq3} \sum_{j \in [n]} y_{j} &= p \\[1em]
+	\label{eq4} \sum_{i \in [n]} q_{i} \cdot x_{ij} &\leq Q_{j} \cdot y_{j} \quad \forall j \in [n] \\[1em]
+	x_{ij} &\in \{0, 1\} \quad \forall i \in [n], \forall j \in [n] \nonumber \\[1em]
+	y_{j} &\in \{0, 1\} \quad \forall j \in [n] \nonumber
+\end{align}
+
+Eq. \eqref{eq2} refer to the assignment constraint, i.e. each location is assigned to exactly one cluster. Eq. \eqref{eq3} refer to the $ p $-median constraint that exactly $ p $ locations are selected as cluster medians. Eq. \eqref{eq4} stipulates that location-median assignments always respect the medians' capacities.
+
 \subsection{Master Problem Formulation}
 
+Let us denote by $ \Omega_{j} $ the polyhedron defined by the $ j $th constraint from Eq. \eqref{eq4}:
 
-\cite{ceselli2005branch}
+\small
+
+\begin{equation}
+	\Omega_{j} = \left\{(x_{1j}, x_{2j}, ..., x_{nj}, y_{j}) \in R^{n + 1} \hspace{0.5em} | \hspace{0.5em} 0 \leq x_{ij} \leq 1 \hspace{0.5em} \forall i \in [n], \hspace{0.5em} 0 \leq y_{j} \leq 1, \hspace{0.5em} \sum_{i \in [n]} q_{i} \cdot x_{ij} \leq Q_{j} \cdot y_{j}\right\} \nonumber
+\end{equation}
+
+\normalsize
+
+Let us denote by $ X_{j} $ the set of integer points within $ \Omega_{j} $:
+
+\begin{equation}
+	X_{j} = \Omega_{j} \cap Z^{n + 1} \nonumber
+\end{equation}
+
+As in \cite{ceselli2005branch}, every point $ (x_{1j}, x_{2j}, ..., x_{nj}, y_{j}) \in conv(X_{j}) $ can be obtained as a convex combination of the $ L_{j} + 1 $ extreme points of $ conv(X_{j}) $. Let us denote by
+
+\begin{equation}
+	\left\{(0, 0, ..., 0, 0), (\bar{x}_{1j}^{1}, \bar{x}_{2j}^{1}, ..., \bar{x}_{nj}^{1}, 1), (\bar{x}_{1j}^{2}, \bar{x}_{2j}^{2}, ..., \bar{x}_{nj}^{2}, 1), ..., (\bar{x}_{1j}^{L_{j}}, \bar{x}_{2j}^{L_{j}}, ..., \bar{x}_{nj}^{L_{j}}, 1)\right\} \nonumber
+\end{equation}
+
+the set of extreme points of $ conv(X_{j}) $ and introduce real multipliers $ \lambda_{j}^{0} $, $ \lambda_{j}^{1} $, $ \lambda_{j}^{2} $, ..., $ \lambda_{j}^{L_{j}} $ for each corresponding extreme point. Then we have
+
+\begin{equation}
+	(x_{1j}, x_{2j}, ..., x_{nj}, y_{j}) = \sum_{k = 0}^{L_{j}} (\bar{x}_{1j}^{k}, \bar{x}_{2j}^{k}, ..., \bar{x}_{nj}^{k}, y_{j}^{k}) \cdot \lambda_{j}^{k},
+\end{equation}
+
+where
+
+\begin{equation}
+	\label{eq5}
+	\sum_{k = 0}^{L_{j}} \lambda_{j}^{k} = 1, \quad 0 \leq \lambda_{j}^{k} \leq 1 \hspace{0.5em} \forall 0 \leq k \leq L_{j}.
+\end{equation}
+
+By substituting the original variables in the original formulation with the expression in Eq. \eqref{eq5} we obtain the Danzig-Wolfe reformulation:
+
+\begin{equation}
+	\label{eq6}
+	z_{MP}^{*} = min \sum_{j \in [n]} \sum_{k = 0}^{L_{j}} \lambda_{j}^{k} \cdot \sum_{i \in [n]} d_{ij} \cdot x_{ij}^{k}
+\end{equation}
+
+s.t.
+
+
+\subsection{Pricing Problem Formulation}
+
+
 
 \section{Experiments}
 \label{sec2}
