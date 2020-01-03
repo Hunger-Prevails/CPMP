@@ -61,7 +61,7 @@ s.t.
 	\label{eq2}	\sum_{j \in [n]} x_{ij} &= 1 \quad \forall i \in [n] \\[1em]
 	\label{eq3} \sum_{j \in [n]} y_{j} &= p \\[1em]
 	\label{eq4} \sum_{i \in [n]} q_{i} \cdot x_{ij} &\leq Q_{j} \cdot y_{j} \quad \forall j \in [n] \\[1em]
-	x_{ij} &\in \{0, 1\} \quad \forall i \in [n], \forall j \in [n] \nonumber \\[1em]
+	x_{ij} &\in \{0, 1\} \quad \forall i \in [n], \quad \forall j \in [n] \nonumber \\[1em]
 	y_{j} &\in \{0, 1\} \quad \forall j \in [n] \nonumber
 \end{align}
 
@@ -94,25 +94,33 @@ As in \cite{ceselli2005branch}, every point $ (x_{1j}, x_{2j}, ..., x_{nj}, y_{j
 the set of extreme points of $ conv(X_{j}) $ and introduce real multipliers $ \lambda_{j}^{0} $, $ \lambda_{j}^{1} $, $ \lambda_{j}^{2} $, ..., $ \lambda_{j}^{L_{j}} $ for each corresponding extreme point. Then we have
 
 \begin{equation}
+	\label{eq5}
 	(x_{1j}, x_{2j}, ..., x_{nj}, y_{j}) = \sum_{k = 0}^{L_{j}} (\bar{x}_{1j}^{k}, \bar{x}_{2j}^{k}, ..., \bar{x}_{nj}^{k}, y_{j}^{k}) \cdot \lambda_{j}^{k},
 \end{equation}
 
 where
 
 \begin{equation}
-	\label{eq5}
-	\sum_{k = 0}^{L_{j}} \lambda_{j}^{k} = 1, \quad 0 \leq \lambda_{j}^{k} \leq 1 \hspace{0.5em} \forall 0 \leq k \leq L_{j}.
+	\sum_{k = 0}^{L_{j}} \lambda_{j}^{k} = 1, \quad \lambda_{j}^{k} \geq 0 \quad \forall k \leq L_{j}, \quad k \in N. \nonumber
 \end{equation}
 
 By substituting the original variables in the original formulation with the expression in Eq. \eqref{eq5} we obtain the Danzig-Wolfe reformulation:
 
 \begin{equation}
 	\label{eq6}
-	z_{MP}^{*} = min \sum_{j \in [n]} \sum_{k = 0}^{L_{j}} \lambda_{j}^{k} \cdot \sum_{i \in [n]} d_{ij} \cdot x_{ij}^{k}
+	z_{MP}^{*} = min \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} \cdot \sum_{i \in [n]} d_{ij} \cdot \bar{x}_{ij}^{k}
 \end{equation}
 
 s.t.
 
+\begin{align}
+	\label{eq7} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \bar{x}_{ij}^{k} * \lambda_{j}^{k} &= 1 \\[1em]
+	\label{eq8} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &= p \\[1em]
+	\label{eq9} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &\leq 1 \quad \forall j \in [n] \\[1em]
+	\quad \lambda_{j}^{k} &\geq 0 \quad \forall j \in [n], \quad \forall k \in [L_{j}] \nonumber
+\end{align}
+
+Here Eq. \eqref{eq7} and Eq. \eqref{eq8} correspond to Eq. \eqref{eq2} and Eq. \eqref{eq3} from the original formulation respectively.
 
 \subsection{Pricing Problem Formulation}
 
