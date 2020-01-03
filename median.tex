@@ -65,11 +65,11 @@ s.t.
 	y_{j} &\in \{0, 1\} \quad \forall j \in [n] \nonumber
 \end{align}
 
-Eq. \eqref{eq2} refer to the assignment constraint, i.e. each location is assigned to exactly one cluster. Eq. \eqref{eq3} refer to the $ p $-median constraint that exactly $ p $ locations are selected as cluster medians. Eq. \eqref{eq4} stipulates that location-median assignments always respect the medians' capacities.
+Eq. \eqref{eq2} refer to the assignment constraint, i.e. each location is assigned to exactly one cluster. Eq. \eqref{eq3} refer to the $ p $-median constraint that exactly $ p $ locations are selected as cluster medians. Capacity inequality \eqref{eq4} stipulates that location-median assignments always respect the median's capacities.
 
 \subsection{Master Problem Formulation}
 
-Let us denote by $ \Omega_{j} $ the polyhedron defined by the $ j $th constraint from Eq. \eqref{eq4}:
+Let us denote by $ \Omega_{j} $ the polyhedron defined by the $ j $-th capacity inequality from constraint \eqref{eq4}:
 
 \small
 
@@ -114,17 +114,45 @@ By substituting the original variables in the original formulation with the expr
 s.t.
 
 \begin{align}
-	\label{eq7} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \bar{x}_{ij}^{k} * \lambda_{j}^{k} &= 1 \\[1em]
+	\label{eq7} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \bar{x}_{ij}^{k} * \lambda_{j}^{k} &= 1 \quad \forall i \in [n] \\[1em]
 	\label{eq8} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &= p \\[1em]
 	\label{eq9} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &\leq 1 \quad \forall j \in [n] \\[1em]
 	\quad \lambda_{j}^{k} &\geq 0 \quad \forall j \in [n], \quad \forall k \in [L_{j}] \nonumber
 \end{align}
 
-Here Eq. \eqref{eq7} and Eq. \eqref{eq8} correspond to Eq. \eqref{eq2} and Eq. \eqref{eq3} from the original formulation respectively.
+Here inequalities \eqref{eq7} and \eqref{eq8} correspond to equations \eqref{eq2} and \eqref{eq3} from the original formulation respectively. The removal of the upper bound in Eq. \eqref{eq2} is justified by the fact that all distances are above zero while the demolition of the lower bound in Eq. \eqref{eq3} comes from the fact that a cluster median whose cluster is empty (i.e. no locations are assigned to this particular median) does not affect the satisfaction of any other constraint.
 
 \subsection{Pricing Problem Formulation}
 
+Let us denote by $ \pi_{i} $ the dual variable obtained for the $ i $-th inequality from constraint \eqref{eq7}, by $ \beta $ the dual variable for constraint \eqref{eq8} and by $ \gamma_{j} $ the $ j $-th inequality from constraint \eqref{eq9}.
 
+In case of a feasible basic solution to the RMP, a reduced cost pricing problem for each median $ j \in [n]$ is solved in order to find a new column with negative reduced cost:
+
+\begin{equation}
+	min \sum_{i \in [n]} (d_{ij} - \pi_{i}) \cdot x_{ij} - \beta - \gamma_{j}
+\end{equation}
+
+s.t.
+
+\begin{align}
+	\sum_{i \in [n]} q_{i} \cdot x_{ij} &\leq Q_{j} \\[1em]
+	x_{ij} &\in \{0, 1\} \quad \forall i \in [n] \nonumber
+\end{align}
+
+If the optimal solution of this pricing problem is below zero, the corresponding minimizer $ (x_{1j}, x_{2j}, ..., x_{nj}, 1) $ will be added to the RMP as a new column. Otherwise an optimal solution to the MP has been found. In case of an infeasible RMP, a farkas pricing problem for each median $ j \in [n]$ is tackled in an attempt to find a new column with positive pricing score:
+
+\begin{equation}
+	max \sum_{i \in [n]} \pi_{i} \cdot x_{ij} + \beta + \gamma_{j}
+\end{equation}
+
+s.t.
+
+\begin{align}
+	\sum_{i \in [n]} q_{i} \cdot x_{ij} &\leq Q_{j} \\[1em]
+	x_{ij} &\in \{0, 1\} \quad \forall i \in [n] \nonumber
+\end{align}
+
+If the optimal solution of this pricing problem is above zero, the corresponding maximizer $ (x_{1j}, x_{2j}, ..., x_{nj}, 1) $ will be added to the RMP as a new column. Otherwise the MP is infeasible. The optimal solution of the two pricing problems above can be obtained using a solver for knapsack problems.
 
 \section{Experiments}
 \label{sec2}
