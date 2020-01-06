@@ -35,14 +35,14 @@
 In the classic capacitated p-median problem, we are given a number $ n \in N $ of locations and a number $ p \in N $ of clusters. For each location $ i $, real numbers $ q_{i} \geq 0 $ and $ Q_{i} \geq 0 $ are given to indicate the demand and capacity of this particular location. Between each pair $ \left(i, j\right) $ of locations $ i $ and $ j $, a real number $ d_{ij} \geq 0 $ is given to indicate the distance between them. The objective to find a way to
 
 \begin{itemize}
-	\item choose $ p $ locations as cluster medians,
+	\item choose $ p $ locations as cluster medians and
 	\item assign each location to a single cluster median,
 \end{itemize}
 
 such that
 
 \begin{itemize}
-    \item the sum of distances $ d_{ij} $ over all pairs $ \left(i, j\right) $ of location $ i $ and cluster median $ j $, such that $ i $ is allocated to $ j $, is minimized,
+    \item the sum of distances $ d_{ij} $ over all pairs $ \left(i, j\right) $ of location $ i $ and cluster median $ j $, such that $ i $ is allocated to $ j $, is minimized and
     \item for each cluster median $ j $, the sum of demands $ q_{i} $ over those locations $ i $ that are allocated to $ j $ does not exceed its capacity $ Q_{j} $.
 \end{itemize}
 
@@ -114,13 +114,13 @@ By substituting the original variables in the original formulation with the expr
 s.t.
 
 \begin{align}
-	\label{eq7} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \bar{x}_{ij}^{k} * \lambda_{j}^{k} &= 1 \quad \forall i \in [n] \\[1em]
-	\label{eq8} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &= p \\[1em]
+	\label{eq7} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \bar{x}_{ij}^{k} * \lambda_{j}^{k} &\geq 1 \quad \forall i \in [n] \\[1em]
+	\label{eq8} \sum_{j \in [n]} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &\leq p \\[1em]
 	\label{eq9} \sum_{k = 1}^{L_{j}} \lambda_{j}^{k} &\leq 1 \quad \forall j \in [n] \\[1em]
 	\quad \lambda_{j}^{k} &\geq 0 \quad \forall j \in [n], \quad \forall k \in [L_{j}] \nonumber
 \end{align}
 
-Here inequalities \eqref{eq7} and \eqref{eq8} correspond to equations \eqref{eq2} and \eqref{eq3} from the original formulation respectively. The removal of the upper bound in Eq. \eqref{eq2} is justified by the fact that all distances are above zero while the demolition of the lower bound in Eq. \eqref{eq3} comes from the fact that a cluster median whose cluster is empty (i.e. no locations are assigned to this particular median) does not affect the satisfaction of any other constraint.
+Here inequalities \eqref{eq7} and \eqref{eq8} correspond to equations \eqref{eq2} and \eqref{eq3} from the original formulation respectively. The removal of the upper bound in Eq. \eqref{eq2} is justified by the fact that all distances are above zero while the demolition of the lower bound in Eq. \eqref{eq3} comes from the fact that a cluster median whose cluster is empty (i.e., no locations are assigned to this particular median) does not affect the satisfaction of any other constraint.
 
 \subsection{Pricing Problem Formulation}
 
