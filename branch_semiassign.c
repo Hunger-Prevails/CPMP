@@ -69,7 +69,7 @@ SCIP_RETCODE computeAssignments(
    for( i = 0; i < nlocations; ++i )
       for( j = 0; j < nlocations; ++j )
          assignments[i][j] = 0.0;
-
+   
    /* ****************************************************************************************************
     * TODO: calculate the assignment value for each location-median pair.
     * i.e., assignments[i][j] should describe the (possible fractional) assignment value of
@@ -82,15 +82,14 @@ SCIP_RETCODE computeAssignments(
     */
    for( i = 0; i < nvars; ++i )
    {
-      int cluster = SCIPvarGetMedian(vars[i]->vardata);
+      int cluster = SCIPvarGetMedian(vars[i]);
 
-      int nmembers = SCIPvarGetNLocations(vars[i]->vardata);
+      int nmembers = SCIPvarGetNLocations(vars[i]);
 
-      int* memebers = SCIPvarGetLocations(vars[i]->vardata);
+      int* memebers = SCIPvarGetLocations(vars[i]);
 
       for ( j = 0; j < nmembers; ++j ) assignments[memebers[j]][cluster] += SCIPgetSolVal(scip, sol, vars[i]);
    }
-
    return SCIP_OKAY;
 }
 
@@ -147,6 +146,7 @@ SCIP_RETCODE chooseLocation(
    *location = -1;
    maxnfracmedians = 0;
    minfracdiff = SCIPinfinity(scip);
+
    for( i = 0; i < nlocations; ++i )
    {
       nfracmedians = 0;
@@ -161,30 +161,27 @@ SCIP_RETCODE chooseLocation(
        * ****************************************************************************************************
        */
 
-      for ( int j = 0; j < nlocations; ++j )
+      for ( median = 0; median < nlocations; ++median )
       {
-         if ( SCIPisFeasIntegral(scip, assignments[i][j] ) )
+         if ( !SCIPisFeasIntegral(scip, assignments[i][median] ) )
          {
            nfracmedians += 1;
-           totfrac += assignments[i][j];
-           if ( (j % 2) == 0 ) halffrac += assignments[i][j];
+           totfrac += assignments[i][median];
+           if ( (median % 2) == 0 ) halffrac += assignments[i][median];
          }
       }
 
-
       SCIPdebugMessage("   -> location %d: totfrac = %g, halffrac = %g\n", i+1, totfrac, halffrac);
 
-      if( nfracmedians > maxnfracmedians
-         || (nfracmedians > 0 && nfracmedians == maxnfracmedians && SCIPisFeasLT(scip, ABS(halffrac-0.5*totfrac), minfracdiff)) )
+      if( nfracmedians > maxnfracmedians || (nfracmedians > 0 && nfracmedians == maxnfracmedians && SCIPisFeasLT(scip, ABS(halffrac - 0.5 * totfrac), minfracdiff)) )
       {
          *location = i;
          maxnfracmedians = nfracmedians;
-         minfracdiff = ABS(halffrac-0.5*totfrac);
+         minfracdiff = ABS(halffrac - 0.5 * totfrac);
 
          SCIPdebugMessage("      -> chosen this location: maxnfracmedians = %d, minfracdiff = %g\n", maxnfracmedians, minfracdiff);
       }
    }
-
    return SCIP_OKAY;
 }
 
@@ -231,16 +228,15 @@ SCIP_RETCODE performBranching(
        * note that the medians are forbidden alternately
        * ****************************************************************************************************
        */
-
       if ( (i % 2) == 1 )
       {
-         leftforbidden[i] = 0;
-         rightforbidden[i] = 1;
+         leftforbidden[sortedids[i]] = 0;
+         rightforbidden[sortedids[i]] = 1;
       }
       else
       {
-         leftforbidden[i] = 1;
-         rightforbidden[i] = 0;
+         leftforbidden[sortedids[i]] = 1;
+         rightforbidden[sortedids[i]] = 0;
       }
    }
 
@@ -261,7 +257,7 @@ SCIP_RETCODE performBranching(
    SCIP_CALL(SCIPcreateChild(scip, &childnode, 0, SCIPgetLocalTransEstimate(scip)));
 
    SCIPsnprintf(name, 25, "SemiassignConstrainsright");
-   SCIP_CALL(SCIPcreateConsSemiassign(scip, &childcons, name, location, leftforbidden, childnode));
+   SCIP_CALL(SCIPcreateConsSemiassign(scip, &childcons, name, location, rightforbidden, childnode));
    SCIP_CALL(SCIPaddConsNode(scip, childnode, childcons, NULL));
    SCIP_CALL(SCIPreleaseCons(scip, &childcons));
 
@@ -330,6 +326,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpSemiassign)
       }
       SCIPdebugPrintf("\n");
 #endif
+      //printf("asdfasdfasdf\n");
       SCIP_CALL( performBranching(scip, sortedids[location], assignments[location], location) );
       *result = SCIP_BRANCHED;
    }

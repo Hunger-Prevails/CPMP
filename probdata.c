@@ -140,7 +140,9 @@ SCIP_RETCODE createConstraints(
    SCIPsnprintf(name, 13, "mediancons");
    SCIP_CALL(SCIPcreateConsLinear(scip, &(probdata->mediancons), name, 0, NULL, NULL, 0, nclusters, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0));
    SCIP_CALL(SCIPaddCons(scip, probdata->mediancons));
-   SCIPprintProbData(scip);
+
+   // SCIPprintProbData(scip);
+
    return SCIP_OKAY;
 }
 

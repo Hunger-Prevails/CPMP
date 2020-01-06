@@ -156,6 +156,10 @@ SCIP_RETCODE performPricing(
    SCIP_Real solval;                         /* total profit returned by the knapsack solver                                      */
    SCIP_Bool success;                        /* indicates whether the knapsack problem was solved successfully                    */
 
+   SCIP_Real* pi_service;
+   SCIP_Real* pi_conv;
+   SCIP_Real pi_median;
+
    int median;
    int location;
 
@@ -183,6 +187,9 @@ SCIP_RETCODE performPricing(
    SCIP_CALL( SCIPallocBufferArray(scip, &solitems, nlocations) );
    SCIP_CALL( SCIPallocBufferArray(scip, &nonsolitems, nlocations) );
 
+   SCIP_CALL( SCIPallocBufferArray(scip, &pi_service, nlocations) );
+   SCIP_CALL( SCIPallocBufferArray(scip, &pi_conv, nlocations) );
+
    *result = SCIP_DIDNOTRUN;
 
    for( median = 0; median < nlocations && !SCIPisStopped(scip); ++median )
@@ -199,13 +206,6 @@ SCIP_RETCODE performPricing(
        * NOTE: The profits depend on whether you do reduced cost pricing or Farkas pricing!
        * ****************************************************************************************************
        */
-      SCIP_Real* pi_service;
-      SCIP_Real* pi_conv;
-      SCIP_Real pi_median;
-
-      SCIP_CALL( SCIPallocBufferArray(scip, &pi_service, nlocations) );
-      SCIP_CALL( SCIPallocBufferArray(scip, &pi_conv, nlocations) );
-
       for ( location = 0; location < nlocations; ++location) {
 
          if (useredcost) {
@@ -255,13 +255,15 @@ SCIP_RETCODE performPricing(
          SCIPdebugMessage("  -> obj = %g\n", score);
 
          /* If an improving column has been found, add it */
-         if( SCIPisPositive(scip, score) & !useredcost || SCIPisNegative(scip, score) & useredcost) addColumn(scip, median, solitems, nsolitems, score);
+         if( (SCIPisNegative(scip, score) && useredcost) || (SCIPisPositive(scip, score) && !useredcost) ) addColumn(scip, median, solitems, nsolitems, score);
       }
       else
       {
          SCIPwarningMessage(scip, "Pricing problem for median %d could not be solved!\n", median + 1);
       }
    }
+   SCIPfreeBufferArray(scip, &pi_service);
+   SCIPfreeBufferArray(scip, &pi_conv);
 
    SCIPfreeBufferArray(scip, &nonsolitems);
    SCIPfreeBufferArray(scip, &solitems);
