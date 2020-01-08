@@ -18,7 +18,6 @@
 \usepackage{mathtools}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
-% \DeclarePairedDelimiter{\brace}{\lbrace}{\rbrace}
 
 \title{A Branch-and-Price Solver based on Column Generation}
 \subtitle{\vspace{0.5cm}a Solution to the Capacitated P-Median Problem}
@@ -154,8 +153,35 @@ s.t.
 
 If the optimal solution of this pricing problem is above zero, the corresponding maximizer $ (x_{1j}, x_{2j}, ..., x_{nj}, 1) $ will be added to the RMP as a new column. Otherwise the MP is infeasible. The optimal solution of the two pricing problems above can be obtained using a solver for knapsack problems.
 
-\section{Experiments}
+\section{Run-time Analysis}
 \label{sec2}
+
+We test out the implementation of such a branch-and-price solver on a set of 10 sufficiently complex instances of the capacitated p-median problem. These instances contain each 50 locations, in which a maximum of 5 locations are allowed to be chosen as cluster medians. We carry out two groups of experiments in parallel, where the only variable is whether we enable branching by enforcing the semi-assignment constraint on both children of the current node or not. Apart from this, an additional control group, in which a standard solver for linear programs is used to process the original formulation of the same set of instances, is included to shed some light on how well our solver has performed. We compare the final (i.e., possibly smallest reachable) gap value and the runtime (the time that has elapsed before the solver first reaches a solution that leads to the final gap value) across the three groups of experiments. The solver is allowed to run for at maximum 100.0 seconds before manually suspended for a single instance. The run-time performance from each group on various instances is summarized in Table \ref{table1}.
+
+\begin{table}[tb]
+	\centering
+	\begin{tabular}{|r|r|r|r|r|r|r|}
+		\hline
+		Instance & \multicolumn{2}{c|}{Control} & \multicolumn{2}{c|}{w/o Branching} & \multicolumn{2}{c|}{with Branching} \\
+		\hline
+		& Runtime(s) & Gap(\%) & Runtime(s) & Gap(\%) & Runtime(s) & Gap(\%) \\
+		\hline
+		1 & 100.0 & 123.25 & 4.30 & 1.13 & 7.85 & 0.0 \\
+		2 & 100.0 & 100.53 & 0.92 & 0.00 & 0.96 & 0.0 \\
+		3 & 100.0 & 106.85 & 2.00 & 0.27 & 1.27 & 0.0 \\
+		4 & 100.0 & 64.92 & 0.98 & 0.00 & 0.99 & 0.0 \\
+		5 & 100.0 & 47.10 & 0.90 & 0.00 & 0.91 & 0.0 \\
+		6 & 100.0 & 74.76 & 0.92 & 0.00 & 0.93 & 0.0 \\
+		7 & 100.0 & 55.71 & 3.20 & 2.02 & 4.86 & 0.0 \\
+		8 & 100.0 & 61.66 & 16.6 & 6.91 & 100.0 & 4.02 \\
+		9 & 100.0 & 61.83 & 6.80 & 0.36 & 3.36 & 0.0 \\
+		10 & 100.0 & 47.46 & 3.20 & 7.35 & 20.58 & 0.0 \\
+		\hline
+	\end{tabular}
+	\caption{\label{table1} Performance comparison on various instances. Runtimes are measured in seconds. Gaps are percentage values.}
+\end{table}
+
+As is shown in the figure, attempts to directly approach the original formulation as a linear program fail to reach a proper solution within 100.0 seconds for all instances. For less complex problems our branch-and-price solver reaches the optimal solution within a small amount of time, regardless of whether the branching option is enabled or not. In cases of a more difficult problem, branching makes a real difference: we observe that, when branching is disabled, the solver enters dead loops after all possible improving columns have already been generated; otherwise new columns continue to be found all the time and the solver soon either yields an optimal solution or at least narrow the gap down to an acceptable scale.
 
 \bibliographystyle{alpha}
 \bibliography{references}
